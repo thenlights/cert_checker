@@ -62,3 +62,7 @@ As I am concentrating my attention much more on the web side, this is likely to 
 ## Disclaimer
 
 This code is here as is, may not work, may be broken, may e not working as intended. use it at your own risk. 
+
+Since somebody screams AI when there is a single commit with most code: this was supposed to be a scrappy throwaway test, so I didn't even git init it; it turned out to be interesting enough to push it forward, so I committed the code before further imrpovements, corrections, mnore checks etc.
+
+I am planning to user Cursor for some steps, mostly to get hint on the quality of my code, hints on how idiomatic it is and so on.

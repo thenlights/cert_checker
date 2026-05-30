@@ -1,6 +1,8 @@
 package main
 
 import (
+	"log"
+
 	"sslchecker/datautils"
 	"sslchecker/sslutils"
 	"sslchecker/termutils"
@@ -8,15 +10,17 @@ import (
 
 func main() {
 
-	hosts := datautils.InfoFrom(datautils.Csv, "knowledge.csv", ";")
+	hosts := datautils.InfoFrom(datautils.Csv, "knowledge.csv", ",")
 	known := datautils.KnownHosts()
 
-	var domain string
-	domain = termutils.Ask("Insert domain: ")
+	domain := termutils.Ask("Insert domain: ")
 
-	cert := sslutils.Check(domain)
+	cert, err := sslutils.Check(domain)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	if value, ok := known[cert.Ip]; ok {
+	if value, ok := known[cert.IP]; ok {
 		termutils.PrintDebug("Recognized Host: " + value)
 	}
 
@@ -34,7 +38,7 @@ func main() {
 
 	termutils.PrintIssuer(cert.Issuer)
 	termutils.PrintCommonName(cert.CommonName)
-	termutils.PrintOwner(cert.Org)
+	termutils.PrintIssuedTo(cert.SubjectOrg)
 	termutils.PrintExpiration(cert.Expiration, cert.ExpiresIn)
 	termutils.PrintSans(cert.Sans)
 	termutils.PrintVersion(cert.Version)

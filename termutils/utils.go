@@ -76,8 +76,8 @@ func PrintRedirectOnly(sentence string) {
 	PrintSentence(Dim, YesNo(sentence), IconRedirect, "Redirect", sentence)
 }
 
-func PrintOwner(sentence string) {
-	PrintSentence(Bold, Cyan, IconOrganization, "Owner", sentence)
+func PrintIssuedTo(sentence string) {
+	PrintSentence(Bold, Cyan, IconOrganization, "Issued to", sentence)
 }
 func PrintCommonName(sentence string) {
 	PrintSentence(Bold, White, IconCommonName, "CN", sentence)
@@ -102,12 +102,10 @@ func PrintExpiration(expiration string, expiresIn int) {
 	switch {
 	case expiresIn > 30:
 		textColor = Green
-	case expiresIn > 15:
+	case expiresIn >= 15:
 		textColor = Yellow
-	case expiresIn < 15:
-		textColor = Red
 	default:
-		textColor = Magenta
+		textColor = Red
 	}
 	PrintSentence(Bold, textColor, IconExpires, "Exp. in", sentence)
 

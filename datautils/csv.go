@@ -15,7 +15,11 @@ func ReadCsv(filename string, separator string) KnowledgeBase {
 	defer file.Close()
 
 	reader := csv.NewReader(file)
-	reader.Comma = ','
+	if separator == "" {
+		reader.Comma = ','
+	} else {
+		reader.Comma = rune(separator[0])
+	}
 
 	// Read the header of the file to be used as map keys
 	headers, err := reader.Read()
@@ -38,7 +42,9 @@ func ReadCsv(filename string, separator string) KnowledgeBase {
 		// Create map  CSV header => row value
 		row := make(map[string]string)
 		for i, header := range headers {
-			row[header] = record[i]
+			if i < len(record) {
+				row[header] = record[i]
+			}
 		}
 		data[row["domain"]] = row
 	}

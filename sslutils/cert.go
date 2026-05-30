@@ -2,8 +2,11 @@ package sslutils
 
 import (
 	"crypto/tls"
+	"crypto/x509/pkix"
+	"fmt"
 	"math"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -12,68 +15,83 @@ type DomainData struct {
 	ExpiresIn  int
 	Sans       []string
 	Issuer     string
-	Org        string
+	SubjectOrg string
 	CommonName string
 	Version    int
 	Domain     string
 	HostName   string
-	Ip         string
+	IP         string
 }
 
-func Check(domain string) DomainData {
-
+func Check(domain string) (DomainData, error) {
 	conn, err := tls.Dial("tcp", domain+":443", nil)
 	if err != nil {
-		panic("Server doesn't support SSL certificate err: " + err.Error())
+		return DomainData{}, fmt.Errorf("server doesn't support SSL certificate: %w", err)
+	}
+	defer conn.Close()
+
+	if err := conn.VerifyHostname(domain); err != nil {
+		return DomainData{}, fmt.Errorf("hostname doesn't match certificate: %w", err)
 	}
 
-	err = conn.VerifyHostname(domain)
+	state := conn.ConnectionState()
+	if len(state.PeerCertificates) == 0 {
+		return DomainData{}, fmt.Errorf("no peer certificate")
+	}
+	cert := state.PeerCertificates[0]
+
+	ip, err := remoteIP(conn.RemoteAddr())
 	if err != nil {
-		panic("Hostname doesn't match with certificate: " + err.Error())
+		return DomainData{}, fmt.Errorf("remote address: %w", err)
 	}
 
-	resolved, err := net.LookupIP(domain)
-	if err != nil {
-		panic("Unable to resolve host IP: " + err.Error())
-	}
-
-	name, err := net.LookupAddr(resolved[0].String())
-	if err != nil {
-		panic("Unable to resolve host Name: " + err.Error())
-	}
-	cert := conn.ConnectionState().PeerCertificates[0]
-	expiry := conn.ConnectionState().PeerCertificates[0].NotAfter
-
+	hostName := reverseHostname(ip)
+	expiry := cert.NotAfter
 	expiresIn := int(math.Floor(expiry.Sub(time.Now()).Hours() / 24))
 
-	var issuer, ip string
-	switch {
-	case len(cert.Subject.Organization) > 0:
-		issuer = cert.Subject.Organization[0]
-	case len(cert.Issuer.Organization) > 0:
-		issuer = cert.Issuer.Organization[0]
-	default:
-		issuer = "N/A"
-	}
-
-	if len(resolved[0]) > 0 {
-		ip = resolved[0].String()
-	} else {
-		ip = "N/A"
-	}
-
-	data := DomainData{
+	return DomainData{
 		Expiration: expiry.Format(time.RFC850),
 		ExpiresIn:  expiresIn,
 		Sans:       cert.DNSNames,
-		Issuer:     issuer,
-		Org:        cert.Issuer.Organization[0],
+		Issuer:     distinguishedName(cert.Issuer),
+		SubjectOrg: subjectOrganization(cert.Subject),
 		CommonName: cert.Subject.CommonName,
 		Version:    cert.Version,
 		Domain:     domain,
-		HostName:   name[0],
-		Ip:         ip,
+		HostName:   hostName,
+		IP:         ip,
+	}, nil
+}
+
+func remoteIP(addr net.Addr) (string, error) {
+	host, _, err := net.SplitHostPort(addr.String())
+	if err != nil {
+		return "", err
 	}
-	
-	return data
+	return host, nil
+}
+
+func reverseHostname(ip string) string {
+	names, err := net.LookupAddr(ip)
+	if err != nil || len(names) == 0 {
+		return "N/A"
+	}
+	return strings.TrimSuffix(names[0], ".")
+}
+
+func distinguishedName(name pkix.Name) string {
+	if name.CommonName != "" {
+		return name.CommonName
+	}
+	if len(name.Organization) > 0 {
+		return name.Organization[0]
+	}
+	return "N/A"
+}
+
+func subjectOrganization(name pkix.Name) string {
+	if len(name.Organization) > 0 {
+		return name.Organization[0]
+	}
+	return "N/A"
 }
