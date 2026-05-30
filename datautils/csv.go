@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func ReadCsv(filename string, separator string) KnowledgeBase {
+func ReadKnowledgeCsv(filename string, separator string) KnowledgeBase {
 	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
@@ -47,6 +47,46 @@ func ReadCsv(filename string, separator string) KnowledgeBase {
 			}
 		}
 		data[row["domain"]] = row
+	}
+
+	return data
+}
+
+func ReadHostsCsv(filename string, separator string) IpToHostName {
+	file, err := os.Open(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	row := 0
+
+	reader := csv.NewReader(file)
+	if separator == "" {
+		reader.Comma = ','
+	} else {
+		reader.Comma = rune(separator[0])
+	}
+
+	data := make(IpToHostName)
+
+	// Read all the other rows
+	for {
+		record, err := reader.Read()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			log.Fatal(err)
+		}
+
+		row += 1
+
+		if len(record) == 2 {
+			data[record[0]] = record[1]
+		} else {
+			log.Fatalf("Row: %i - Invalid record for ip to host in csv, skipping", row)
+		}
 	}
 
 	return data

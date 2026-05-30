@@ -11,7 +11,7 @@ import (
 func main() {
 
 	hosts := datautils.InfoFrom(datautils.Csv, "knowledge.csv", ",")
-	known := datautils.KnownHosts()
+	known := datautils.KnownHostsFromSource(datautils.Csv, "ip_to_host.csv", ",")
 
 	domain := termutils.Ask("Insert domain: ")
 

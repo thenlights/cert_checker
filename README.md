@@ -12,6 +12,17 @@ This has been written using: GoLand, terminal with Fish Shell, DuckDuckGo, onlin
 
 As this is educational, feel free to open issues, write comments, give guidance or anything, it was my first Go program after reading "Learning Go" and has been done in barely a couple of hours. Actually, writing the README has taken more time than the code.
 
+## Run it
+
+You need Go installed, and that' pretty much it, Go is batteries included so there is no need to dependencies.
+
+To run it just go to the main folder in a terminal and do
+
+````bash
+go run .
+````
+
+
 ## Rationale
 
 Suppose you have several customers who keep inquiring: "Are these certificate going to expire soon"?
