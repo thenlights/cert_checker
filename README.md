@@ -25,21 +25,22 @@ go run .
 
 ## Rationale
 
-Suppose you have several customers who keep inquiring: "Are these certificate going to expire soon"?
-The point is: there are different agencies producing different certificates with different timespans for different webbsites.
-In time, some of the websites / webbapps have been dismissed, some have changed the certificate provider, some have been moved to other machines.
+Suppose you have several customers who keep inquiring: "Are the certificates for <list of domains> going to expire soon"?
+The point is: there are different agencies producing different certificates with different timespans for different websites deployed on different machines by different teams of developers.
+At some point, some of the websites / web-apps may have been dismissed, some may have changed the certificate provider, some others may have been moved to other machines.
 
-The final goal is to gather as much info as possible, acquire a renewed certificate by the current provider of that certificate and contact the DevOps team with precise information on what needs to be updated where. In formation such as load balancer or "the sites is being dismissed but for now redirect to that other site" are useful to have.
+The final goal is to gather as much info as possible, acquire a renewed certificate by the current provider of that certificate and contact the DevOps team with precise information on what needs to be updated where. Information such as "remember this one has a load balancer setup" or "the sites is being dismissed but for now redirect to that other site" is quite useful to have.
 
 The ideal solution is to have an automated software check out all the domains managed autonomously.
-There are tools for this, but as a quick and dirty solution a script used to do this:
+
+There are likely tools better tools for this, but as a quick and dirty solution a script was hacked together to do this:
 - ask for a domain
 - check available LOCAL/INTERNAL info 
   - resolve the domain name to get an IP address
   - check the IP and extract a description for the host
-  - look for the domain name in a dictionary (manually created by fiddling with data from a worksheet and morphed using some fancy multi cursor black magic) and provide known information ("knowledge" of the internal systems)
+  - look for the domain name in a dictionary (manually created by fiddling with data from a worksheet and morphed using some fancy multi cursor black magic and updated time to time) and provide known information ("knowledge" of the internal systems)
 - check the certificate for the domain by connecting, getting the certificate and getting live information about it: expiration, SANs, issuers, ecc.
-- provide a schematic report on the domain
+- provide a schematic report about the domain
 
 With this script being a temporary solution, it never got much time spent on it. Planned changes were:
 - Tests
@@ -51,12 +52,14 @@ With this script being a temporary solution, it never got much time spent on it.
 
 Things yet to be ported:
 - interactive loop to keep inserting domains until finished
-- non blocking error domain (will need to either turn panic into errors or using recover)
+- ~~non blocking error domain (will need to either turn panic into errors or using recover)~~ (mostly done) 
 
 The point of the code is:
 - compare the differences in writing the code between a language, Ruby, that is built with ease of development (developer before the machine) and abstraction (pure OOP) and another language, Go, that follows a pragmatical approach that is neither functional, nor OOP, nor properly imperative
   - in code statistics (length, time spent, quality of the result, ...)
-  - semantics, statistics and so on. 
+  - semantics, statistics, language ergonomics and so on
+  - reasoning: am I getting the intended way to build things together?
+- eventually, evaluate both a _kaizen_ approach or a full rewrite (e.g. using a TDD approach) to move the "just a script" into a well-designed solution, so that I know which route to follow for more complicate tasks.
 
 ## Should I use it?
 
