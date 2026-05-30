@@ -1,0 +1,5 @@
+domain,to,server_app,balancer,redirect
+test.local,127.0.0.1,localhost - 127.0.0.1,no,no
+google.com,142.250.181.174,Google server - 142.250.181.174,yes,no
+duck.com,52.142.124.215,Duck duck go server - 52.142.124.215,yes,no
+bing.com,150.171.28.10,Bing Server - 150.171.28.10,yes,no

@@ -38,6 +38,10 @@ With this script being a temporary solution, it never got much time spent on it.
 - a scan mode to check all the domains in the Worksheet, with alerts for those expiring
 - exporters (e.g. generate the text of an email with the information laid out to make contacting the DevOps teams quickly).
 
+Things yet to be ported:
+- interactive loop to keep inserting domains until finished
+- non blocking error domain (will need to either turn panic into errors or using recover)
+
 The point of the code is:
 - compare the differences in writing the code between a language, Ruby, that is built with ease of development (developer before the machine) and abstraction (pure OOP) and another language, Go, that follows a pragmatical approach that is neither functional, nor OOP, nor properly imperative
   - in code statistics (length, time spent, quality of the result, ...)
