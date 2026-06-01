@@ -1,0 +1,5 @@
+{
+  "csv_separator": ",",
+  "knowledge_csv_file": "knowledge.csv",
+  "ip_to_host_file": "ip_to_host.csv"
+}

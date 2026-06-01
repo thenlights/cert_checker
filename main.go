@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"sslchecker/config"
 
 	"sslchecker/datautils"
 	"sslchecker/sslutils"
@@ -10,8 +12,15 @@ import (
 
 func main() {
 
-	hosts := datautils.InfoFrom(datautils.Csv, "knowledge.csv", ",")
-	known := datautils.KnownHostsFromSource(datautils.Csv, "ip_to_host.csv", ",")
+	conf, err := config.LoadConfig("config.json")
+	if err != nil {
+		fmt.Println("Error reading config file:", err)
+		fmt.Println("using defaults")
+		conf = config.DefaultConfig()
+	}
+
+	hosts := datautils.InfoFrom(datautils.Csv, conf.KnowledgeCsvFile, conf.CsvSeparator)
+	known := datautils.KnownHostsFromSource(datautils.Csv, conf.IpToHostFile, conf.CsvSeparator)
 
 	domain := termutils.Ask("Insert domain: ")
 
