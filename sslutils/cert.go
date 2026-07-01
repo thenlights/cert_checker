@@ -24,21 +24,38 @@ type DomainData struct {
 }
 
 func Check(domain string) (DomainData, error) {
-	conn, err := tls.Dial("tcp", domain+":443", nil)
+	return CheckAddr(domain+":443", domain)
+}
+
+func CheckAddr(addr, serverName string) (DomainData, error) {
+	return checkTLSAddr(addr, serverName, false)
+}
+
+func checkTLSAddr(addr, serverName string, insecure bool) (DomainData, error) {
+	cfg := &tls.Config{ServerName: serverName}
+	if insecure {
+		cfg.InsecureSkipVerify = true
+	}
+
+	conn, err := tls.Dial("tcp", addr, cfg)
 	if err != nil {
 		return DomainData{}, fmt.Errorf("server doesn't support SSL certificate: %w", err)
 	}
 	defer conn.Close()
-
-	if err := conn.VerifyHostname(domain); err != nil {
-		return DomainData{}, fmt.Errorf("hostname doesn't match certificate: %w", err)
-	}
 
 	state := conn.ConnectionState()
 	if len(state.PeerCertificates) == 0 {
 		return DomainData{}, fmt.Errorf("no peer certificate")
 	}
 	cert := state.PeerCertificates[0]
+
+	if insecure {
+		if err := cert.VerifyHostname(serverName); err != nil {
+			return DomainData{}, fmt.Errorf("hostname doesn't match certificate: %w", err)
+		}
+	} else if err := conn.VerifyHostname(serverName); err != nil {
+		return DomainData{}, fmt.Errorf("hostname doesn't match certificate: %w", err)
+	}
 
 	ip, err := remoteIP(conn.RemoteAddr())
 	if err != nil {
@@ -57,7 +74,7 @@ func Check(domain string) (DomainData, error) {
 		SubjectOrg: subjectOrganization(cert.Subject),
 		CommonName: cert.Subject.CommonName,
 		Version:    cert.Version,
-		Domain:     domain,
+		Domain:     serverName,
 		HostName:   hostName,
 		IP:         ip,
 	}, nil

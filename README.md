@@ -79,4 +79,4 @@ This code is here as is, may not work, may be broken, may e not working as inten
 
 Since somebody screams AI when there is a single commit with most code: this was supposed to be a scrappy throwaway test, so I didn't even git init it; it turned out to be interesting enough to push it forward, so I committed the code before further imrpovements, corrections, mnore checks etc.
 
-I am planning to user Cursor for some steps, mostly to get hint on the quality of my code, hints on how idiomatic it is and so on.
+I am planning to use Cursor for some steps, mostly to get hint on the quality of my code, hints on how idiomatic it is and so on. --> cursor used to help with tests, which are added as a first iteration, but will be revised

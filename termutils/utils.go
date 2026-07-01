@@ -96,19 +96,20 @@ func PrintAlert(sentence string) {
 	fmt.Println(Red + sentence + Reset)
 }
 
-func PrintExpiration(expiration string, expiresIn int) {
-	sentence := strconv.Itoa(expiresIn) + " days (" + expiration + ")"
-	var textColor string
+func ExpirationColor(expiresIn int) string {
 	switch {
 	case expiresIn > 30:
-		textColor = Green
+		return Green
 	case expiresIn >= 15:
-		textColor = Yellow
+		return Yellow
 	default:
-		textColor = Red
+		return Red
 	}
-	PrintSentence(Bold, textColor, IconExpires, "Exp. in", sentence)
+}
 
+func PrintExpiration(expiration string, expiresIn int) {
+	sentence := strconv.Itoa(expiresIn) + " days (" + expiration + ")"
+	PrintSentence(Bold, ExpirationColor(expiresIn), IconExpires, "Exp. in", sentence)
 }
 
 func PrintSans(sans []string) {

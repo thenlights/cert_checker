@@ -19,8 +19,14 @@ func main() {
 		conf = config.DefaultConfig()
 	}
 
-	hosts := datautils.InfoFrom(datautils.Csv, conf.KnowledgeCsvFile, conf.CsvSeparator)
-	known := datautils.KnownHostsFromSource(datautils.Csv, conf.IpToHostFile, conf.CsvSeparator)
+	hosts, err := datautils.InfoFrom(datautils.Csv, conf.KnowledgeCsvFile, conf.CsvSeparator)
+	if err != nil {
+		log.Fatal(err)
+	}
+	known, err := datautils.KnownHostsFromSource(datautils.Csv, conf.IpToHostFile, conf.CsvSeparator)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	domain := termutils.Ask("Insert domain: ")
 

@@ -2,44 +2,42 @@ package datautils
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
-	"log"
 	"os"
 )
 
-func ReadKnowledgeCsv(filename string, separator string) KnowledgeBase {
+func ReadKnowledgeCsv(filename string, separator string) (KnowledgeBase, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer file.Close()
 
 	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1
 	if separator == "" {
 		reader.Comma = ','
 	} else {
 		reader.Comma = rune(separator[0])
 	}
 
-	// Read the header of the file to be used as map keys
 	headers, err := reader.Read()
 	if err != nil {
-		log.Fatal(err)
+		return nil, fmt.Errorf("read knowledge csv header: %w", err)
 	}
 
 	data := make(KnowledgeBase)
 
-	// Read all the other rows
 	for {
 		record, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal(err)
+			return nil, fmt.Errorf("read knowledge csv row: %w", err)
 		}
 
-		// Create map  CSV header => row value
 		row := make(map[string]string)
 		for i, header := range headers {
 			if i < len(record) {
@@ -49,19 +47,18 @@ func ReadKnowledgeCsv(filename string, separator string) KnowledgeBase {
 		data[row["domain"]] = row
 	}
 
-	return data
+	return data, nil
 }
 
-func ReadHostsCsv(filename string, separator string) IpToHostName {
+func ReadHostsCsv(filename string, separator string) (IpToHostName, error) {
 	file, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	defer file.Close()
 
-	row := 0
-
 	reader := csv.NewReader(file)
+	reader.FieldsPerRecord = -1
 	if separator == "" {
 		reader.Comma = ','
 	} else {
@@ -70,24 +67,22 @@ func ReadHostsCsv(filename string, separator string) IpToHostName {
 
 	data := make(IpToHostName)
 
-	// Read all the other rows
+	row := 0
 	for {
 		record, err := reader.Read()
 		if err != nil {
 			if err == io.EOF {
 				break
 			}
-			log.Fatal(err)
+			return nil, fmt.Errorf("read hosts csv row: %w", err)
 		}
 
-		row += 1
-
-		if len(record) == 2 {
-			data[record[0]] = record[1]
-		} else {
-			log.Fatalf("Row: %i - Invalid record for ip to host in csv, skipping", row)
+		row++
+		if len(record) != 2 {
+			return nil, fmt.Errorf("row %d: invalid ip-to-host record (expected 2 columns, got %d)", row, len(record))
 		}
+		data[record[0]] = record[1]
 	}
 
-	return data
+	return data, nil
 }

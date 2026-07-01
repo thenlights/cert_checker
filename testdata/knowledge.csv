@@ -1,0 +1,3 @@
+domain,to,server_app,balancer,redirect
+example.com,10.0.0.1,app-server,no,no
+short.row,only-one-col
